@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isOwner() {
+      return signedIn() && request.auth.token.email_verified == true
+        && request.auth.token.email in ['kimsydney0320@gmail.com'];
+    }
+    // ===================== MOONBALL =====================
+    // one doc per player: {days:{"YYYY-MM-DD":{y,t,at,picks}}, last}
+    match /scores/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['days', 'last'])
+        && request.resource.data.days is map
+        && request.resource.data.last is int;
+      allow delete: if (signedIn() && request.auth.uid == uid) || isOwner();
+    }
+    // private synced stats/streaks/kits
+    match /profiles/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+    // public leaderboard nickname, chosen by the player (real names are never shown)
+    match /nicks/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 16
+        && request.resource.data.name.matches('^[A-Za-z0-9 _.\\-]+$')
+        && request.resource.data.at is int;
+      allow delete: if (signedIn() && request.auth.uid == uid) || isOwner();
+    }
+    // "should this count?" reports: anyone playing can file, only the owner reads/clears
+    match /flags/{id} {
+      allow create: if signedIn()
+        && request.resource.data.answer is string && request.resource.data.answer.size() <= 80
+        && request.resource.data.prompt is string && request.resource.data.prompt.size() <= 80;
+      allow read, delete: if isOwner();
+    }
+    // Question Studio: everyone reads, only the owner writes
+    match /customPrompts/{id} { allow read: if true; allow write: if isOwner(); }
+    match /custom/{id} { allow read: if true; allow write: if isOwner(); }
+
+    // ===================== DEEP THREE (same rules, d3_ collections) =====================
+    // one doc per player: {days:{"YYYY-MM-DD":{y,t,at,picks}}, last}
+    match /d3_scores/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['days', 'last'])
+        && request.resource.data.days is map
+        && request.resource.data.last is int;
+      allow delete: if (signedIn() && request.auth.uid == uid) || isOwner();
+    }
+    // private synced stats/streaks/kits
+    match /d3_profiles/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+    // public leaderboard nickname, chosen by the player (real names are never shown)
+    match /d3_nicks/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 16
+        && request.resource.data.name.matches('^[A-Za-z0-9 _.\\-]+$')
+        && request.resource.data.at is int;
+      allow delete: if (signedIn() && request.auth.uid == uid) || isOwner();
+    }
+    // "should this count?" reports: anyone playing can file, only the owner reads/clears
+    match /d3_flags/{id} {
+      allow create: if signedIn()
+        && request.resource.data.answer is string && request.resource.data.answer.size() <= 80
+        && request.resource.data.prompt is string && request.resource.data.prompt.size() <= 80;
+      allow read, delete: if isOwner();
+    }
+    // Question Studio: everyone reads, only the owner writes
+    match /d3_customPrompts/{id} { allow read: if true; allow write: if isOwner(); }
+    match /d3_custom/{id} { allow read: if true; allow write: if isOwner(); }
+  }
+}
