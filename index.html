@@ -2809,7 +2809,7 @@ var SCENE=(function(){
     return fresh;
   }
 
-  /* ---------- sign-in (your claude.ai account) + cross-device sync ---------- */
+  /* ---------- sign-in (Google, via Firebase Auth) + cross-device sync ---------- */
   var profileRef=null;
   async function signIn(){
     var ctx=await timeout(dbCtx(),6000);

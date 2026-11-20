@@ -71,16 +71,12 @@
   }
   var db = { doc: docApi, collection: colApi };
   function isGuest(){ var u = auth.currentUser; return !u || u.isAnonymous; }
-  function shortName(n){ var p = String(n || "").trim().split(/\s+/); return p.length > 1 ? p[0] + " " + p[p.length-1].charAt(0) + "." : (p[0] || ""); }
+  // Leaderboard names live in "d3_nicks" and are read and written by index.html directly.
+  // There is no "names" collection and no rule granting access to one: don't add a path here.
   var user = {
     id: function(){ return ready.then(function(u){ return u ? u.uid : null; }); },
     me: function(){ return ready.then(function(){ var u = auth.currentUser; return u && !u.isAnonymous ? { name: u.displayName || (u.email || "").split("@")[0] } : null; }); },
-    isOwner: function(){ return ready.then(function(){ var u = auth.currentUser; return !!(u && !u.isAnonymous && u.emailVerified && u.email && owners.indexOf(u.email.toLowerCase()) >= 0); }); },
-    profiles: function(ids){
-      return Promise.all(ids.map(function(id){
-        return fs.doc("names/" + id).get().then(function(s){ return [id, { name: s.exists ? (s.data().name || "") : "" }]; }, function(){ return [id, { name: "" }]; });
-      })).then(function(pairs){ var o = {}; pairs.forEach(function(p){ o[p[0]] = p[1]; }); return o; });
-    }
+    isOwner: function(){ return ready.then(function(){ var u = auth.currentUser; return !!(u && !u.isAnonymous && u.emailVerified && u.email && owners.indexOf(u.email.toLowerCase()) >= 0); }); }
   };
   window.claude = { use: function(n){ return ready.then(function(){ return n === "db" ? db : n === "user" ? user : null; }); } };
 
@@ -100,7 +96,6 @@
         alert("Sign-in didn't work: " + (e && e.message || e)); return false;
       });
     },
-    signOut: function(){ return auth.signOut().then(function(){ location.reload(); }); },
-    saveName: function(n){ var u = auth.currentUser; if (!u || u.isAnonymous) return; return fs.doc("names/" + u.uid).set({ name: shortName(n).slice(0, 24) }); }
+    signOut: function(){ return auth.signOut().then(function(){ location.reload(); }); }
   };
 })();
