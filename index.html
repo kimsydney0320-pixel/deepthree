@@ -825,7 +825,7 @@
   .allans .chip{font-size:17px!important;padding:2px 8px!important}
   .crowdnote{font-family:var(--vt,inherit);font-size:17px;color:#7f89a3;text-align:center;margin:14px 0 0}
   /*SCENECSS*/#sceneCv{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:0;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
-  .wrap{transition:opacity .3s} body.scenecam .wrap{opacity:0!important} body.scenecam .mute{opacity:0}
+  .wrap{transition:opacity .3s} body.scenecam .wrap{opacity:0!important;pointer-events:none} body.scenecam .mute{opacity:0}
   .mast p{background:rgba(11,6,32,.85);padding:8px 12px;box-shadow:inset 0 0 0 2px #2a1660}
   .sect{background:rgba(11,6,32,.85);padding:6px 10px}/*/SCENECSS*/
 </style>
@@ -1107,6 +1107,7 @@ var SCENE=(function(){
   function meSpot(){ var d=6.4, lat=NBA?-1.2:-3.2; if(W<180) lat=NBA?-0.6:-1.6;
     var x=X(d,lat), h=HP(2,d), colL=((innerWidth-880)/2)/S;
     if(colL>h*0.45 && !st.cam) x=colL/2;
+    var half=8*Math.max(1,Math.round(h/26))+2; x=Math.max(half,Math.min(W-half,x));
     return {x:x,y:H-2,h:h}; }
   function drawMe(t){
     var m=meSpot(), y=m.y, x=m.x;
@@ -1141,6 +1142,7 @@ var SCENE=(function(){
     if(NBA && st.swishUntil>now) rimDraw(true);
     drawBall(now);
     drawMe(now);
+    if(st.cam){ var hint="TAP OR PRESS ENTER TO SKIP", hw=textW(hint,1); g.fillStyle="rgba(11,6,32,.8)"; g.fillRect(Math.round(W/2-hw/2)-3,H-12,hw+6,9); text(hint,Math.round(W/2-hw/2),H-10,1,"#f3efff"); }
     // vignette so the page stays readable
     var v=g.createLinearGradient(0,0,0,H); v.addColorStop(0,"rgba(7,4,26,.15)"); v.addColorStop(0.6,"rgba(7,4,26,0)"); v.addColorStop(1,"rgba(7,4,26,.25)");
     g.fillStyle=v; g.fillRect(0,0,W,H);
@@ -1159,8 +1161,11 @@ var SCENE=(function(){
     if(reduce) return; st.cam=true; document.body.classList.add("scenecam");
     clearTimeout(st.camT); st.camT=setTimeout(function(){ st.cam=false; document.body.classList.remove("scenecam"); schedule(); },ms);
   }
-  function throwBall(pts,big,label,td,col){
-    if(big||td) camMoment((NBA?900+pts*8:700+pts*10)+1500);
+  function endCam(){ if(!st.cam) return; clearTimeout(st.camT); st.cam=false; document.body.classList.remove("scenecam"); schedule(); }
+  addEventListener("keydown",function(e){ if(st.cam && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); e.stopPropagation(); endCam(); } },true);
+  addEventListener("pointerdown",function(e){ if(st.cam){ e.preventDefault(); e.stopPropagation(); endCam(); } },true);
+    function throwBall(pts,big,label,td,col){
+    camMoment((NBA?900+pts*8:700+pts*10)+(big||td?1500:900));
     var now=performance.now(), h=handFor();
     st.qbPose="shoot"; setTimeout(function(){ st.qbPose="back"; },NBA?700:450);
     if(NBA){
@@ -1181,6 +1186,7 @@ var SCENE=(function(){
     (function step(){ var q=Math.min(1,(performance.now()-t0)/dur); p.d=d0+(d-d0)*q; p.lat=l0+(lat-l0)*q; if(q<1) requestAnimationFrame(step); else setTimeout(function(){ p.d=NBA?p.d:14; p.lat=NBA?p.lat:-12; },2600); schedule(); })();
   }
   function miss(kind){
+    camMoment(1700);
     var now=performance.now(), h=handFor();
     if(kind==="sack"){ st.sackT=now+900; flashBig(NBA?"BLOCKED":"SACKED","#ff5a5a",1800); schedule(); return; }
     st.qbPose="shoot"; setTimeout(function(){ st.qbPose="back"; },450);
