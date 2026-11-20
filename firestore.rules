@@ -1,3 +1,9 @@
+// Firestore rules for BOTH games, kept identical in both repos.
+//   Moonball    -> unprefixed collections (scores, profiles, nicks, flags, custom*)
+//   Deep Three  -> the same collections prefixed d3_
+// One live ruleset in the Firebase console serves both games, so a copy that covers only
+// one of them will silently delete the other game's rules when deployed. Edit this file in
+// either repo, copy it to the other, then paste it into Firebase console > Firestore > Rules.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
