@@ -812,6 +812,18 @@
   .presented .pl{display:block;font-size:17px;color:#9b8fd0}
   .supportline{text-align:center;font-family:var(--vt);font-size:19px;color:#b3a6e0;margin:16px 0 4px}
   .supportline a{color:#3df5ff}
+
+  .crowdline{margin:12px auto 0;max-width:520px;text-align:center;font-family:var(--vt,inherit);font-size:19px;line-height:1.3;color:#c9d1e3}
+  .crowdline b{color:var(--gold,#ffd84d);font-weight:normal}
+  .fr .crowdline{text-align:left;margin:0 0 8px;max-width:none;font-size:18px}
+  .allans{margin-top:10px}
+  .allans summary{cursor:pointer;font-family:var(--px,inherit);font-size:10px;text-transform:uppercase;color:var(--gold,#ffd84d);padding:6px 0;list-style:none}
+  .allans summary::-webkit-details-marker{display:none}
+  .allans summary:before{content:"\25B8  "} .allans[open] summary:before{content:"\25BE  "}
+  .agrp{margin:8px 0}
+  .agrp .ah{font-family:var(--px,inherit);font-size:9px;text-transform:uppercase;color:var(--tc,#9aa6c4);margin-bottom:6px}
+  .allans .chip{font-size:17px!important;padding:2px 8px!important}
+  .crowdnote{font-family:var(--vt,inherit);font-size:17px;color:#7f89a3;text-align:center;margin:14px 0 0}
 </style>
 </head>
 <body>
@@ -1875,6 +1887,29 @@
   }
   var RARITY={chalk:["Common",1],bandwagon:["Uncommon",2],starter:["Rare",3],film:["Epic",4],deep:["Legendary",5],hail:["Mythic",6],miss:["Blocked",0]};
   function pipsHTML(n){ var h=""; for(var i=1;i<=6;i++) h+='<i class="'+(i<=n?"on":"")+'"></i>'; return h; }
+  // Rarity line, Top-Binz style: an estimate from the answer's tier and its place in that tier.
+  var CROWD_RANGE={chalk:[2,6],bandwagon:[7,22],starter:[24,70],film:[80,180],deep:[200,420],hail:[450,950]};
+  function crowdInfo(p){
+    buildIndex(p); var E=p._entries, most=E[0]||null, deep=null;
+    for(var i=E.length-1;i>=0;i--){ if(!deep || TIERS.map(function(t){return t.key;}).indexOf(E[i].tier)>TIERS.map(function(t){return t.key;}).indexOf(deep.tier)) deep=E[i]; }
+    return {most:most?most.display:"",deep:deep?deep.display:"",total:E.length};
+  }
+  function oneIn(p,said){
+    buildIndex(p); var e=null; p._entries.forEach(function(x){ if(!e && x.display===said) e=x; }); if(!e) return 0;
+    var same=p._entries.filter(function(x){return x.tier===e.tier;}), i=same.indexOf(e), r=CROWD_RANGE[e.tier]||[2,6];
+    var n=r[0]+(r[1]-r[0])*(i+0.5)/Math.max(1,same.length);
+    if(e===p._entries[0]) n=Math.min(n,2);
+    return Math.max(2,Math.round(n));
+  }
+  function crowdLine(p,said){
+    var c=crowdInfo(p), bits=[];
+    if(said){ var n=oneIn(p,said); if(n) bits.push('About <b>1 in '+n+'</b> fans say this.'); }
+    if(said && said===c.most) bits.push('The most common answer.');
+    else if(c.most) bits.push('Most said: <b>'+esc(c.most)+'</b>.');
+    if(said && said===c.deep && c.deep!==c.most) bits.push('You found the deepest cut!');
+    else if(c.deep && c.deep!==c.most) bits.push('Deepest cut: <b>'+esc(c.deep)+'</b>.');
+    return bits.join(' ');
+  }
   function verdict(r){
     if(r.hm==="int"){
       $("verdictView").innerHTML='<div class="pcard t-miss r0 hmint"><div class="pc-top"><span class="rar">Hail Mary</span><span class="pips">'+pipsHTML(0)+'</span></div>'+
@@ -1889,6 +1924,7 @@
     h+='<div class="pc-top"><span class="rar">'+(t?rr[0]:missLbl)+'</span><span class="pips">'+pipsHTML(rr[1])+'</span></div>';
     h+='<div class="pc-mid"><div class="pc-play">'+(r.hm==="hit"?"Hail Mary \u2014 caught!":(t?t.label:missLbl))+'</div><div class="pc-yds">+'+(r.hm==="hit"?r.pts:(t?t.pts:0))+'<small>'+(r.hm==="hit"?"PTS \u00D7 2":"PTS")+'</small></div></div>';
     h+='<div class="pc-name"><b>'+(r.said?esc(r.said):"No answer")+'</b><span>'+(t?esc(t.blurb.split(". ")[0]):(r.away?"Out of bounds \u2014 no harm done":"Held it too long"))+'</span></div></div>';
+    h+='<div class="crowdline">'+crowdLine(r.p,r.said)+'</div>';
     $("verdictView").innerHTML=h;
     $("askView").classList.add("hidden");
     $("verdictView").classList.remove("hidden");
@@ -2477,6 +2513,15 @@
   }
 
   /* ---------- film room: best answers, shown only after the game ---------- */
+  function allAnswers(r){
+    var p=r.p; buildIndex(p);
+    var groups=TIERS.slice().reverse().map(function(t){
+      var es=p._entries.filter(function(e){return e.tier===t.key;}); if(!es.length) return "";
+      return '<div class="agrp t-'+t.key+'"><div class="ah">'+esc(t.label)+' · '+t.pts+'</div><div class="chips">'+
+        es.map(function(e){ return '<span class="chip t-'+e.tier+'">'+(e.display===r.said?'✓ ':'')+esc(e.display)+'</span>'; }).join("")+'</div></div>';
+    }).join("");
+    return '<details class="allans"><summary>See all '+p._entries.length+' answers</summary>'+groups+'</details>';
+  }
   function renderFilm(){
     $("film").innerHTML=S.res.map(function(r){
       var t=TIERMAP[r.tier];
@@ -2484,10 +2529,11 @@
         .concat(r.p._entries.filter(function(e){return e.tier==="deep";})).slice(0,6);
       return '<div class="fr t-'+(t?t.key:"miss")+'"><div class="q">'+esc(r.prompt)+'</div>'+
         '<div class="you">You: <b>'+(r.said?esc(r.said)+' · '+t.label+' +'+r.pts:(r.away?'I don\u2019t know \u00B7 passed it out':'no answer \u00B7 blocked'))+'</b></div>'+
+        '<div class="crowdline">'+crowdLine(r.p,r.said)+'</div>'+
         '<div class="chips">'+best.map(function(e){
           return '<span class="chip t-'+e.tier+'">'+(e.display===r.said?'✓ ':'')+esc(e.display)+' · '+TIERMAP[e.tier].pts+'</span>';
-        }).join("")+'</div></div>';
-    }).join("");
+        }).join("")+'</div>'+allAnswers(r)+'</div>';
+    }).join("")+'<p class="crowdnote">\u201C1 in X\u201D is our estimate of how rare each answer is, based on its tier. It isn\u2019t a live count of players.</p>';
   }
 
   /* ---------- score distribution (shared db) ---------- */
