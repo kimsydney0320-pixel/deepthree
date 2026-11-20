@@ -1786,6 +1786,8 @@
     var p=S.set[S.i];
     var hit=match(p,raw);
     if(hit) return score(hit);
+    // Second Enter on the same text takes the suggestion on screen.
+    if(S.sugg && S.sugg.length && S.suggFor===raw) return score(S.sugg[0]);
     var sugg=suggest(p,raw);
     if(sugg.length){ showSuggest(sugg,false); }
     else{
@@ -1803,14 +1805,14 @@
   function showSuggest(list,live){
     var sig=list.map(function(e){return e.display;}).join("|")+(live?"L":"S");
     var changed=sig!==S.suggSig; S.suggSig=sig;
-    S.sugg=list;
+    S.sugg=list; S.suggFor=live?null:$("answerInput").value.trim();
     var fb=$("feedback");
     if(!list.length){ fb.innerHTML=""; return; }
     if(changed) SFX.pop();
     fb.innerHTML='<div class="suggest'+(live?' live':'')+'"><span class="lbl">Did you mean</span>'+
       list.map(function(e,i){ return '<button type="button" data-i="'+i+'"><b>'+esc(e.display)+'</b>?</button>'; }).join("")+
       (live ? '<span class="hint"><kbd>Tab</kbd> to pick</span>'
-            : '<button type="button" class="no" data-i="-1">No, let me retype</button>')+'</div>';
+            : '<span class="hint"><kbd>Enter</kbd> again to pick</span><button type="button" class="no" data-i="-1">No, let me retype</button>')+'</div>';
     Array.prototype.forEach.call(fb.querySelectorAll("button"),function(b){
       b.addEventListener("click",function(){
         var i=+b.getAttribute("data-i");
@@ -1829,7 +1831,7 @@
   });
 
   function score(hit){
-    stopClock(); S.answered=true;
+    stopClock(); S.answered=true; S.sugg=[]; S.suggFor=null;
     var start=field.pos, t=TIERMAP[hit.tier], hm=null, pts=hit.pts;
     if(isHM()){ if(HM_TIERS.indexOf(hit.tier)>=0){ hm="hit"; pts=hit.pts*2; } else { hm="int"; pts=-HM_INT; } }
     var r={p:S.set[S.i],prompt:S.set[S.i].prompt,said:hit.display,tier:hit.tier,pts:pts,start:0,end:pts,td:hm!=="int",hm:hm};
