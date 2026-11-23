@@ -7,6 +7,17 @@
 <meta name="description" content="Daily NBA trivia. 7 prompts, 25 seconds each. Name the answer nobody else knows to shoot from the logo.">
 <meta property="og:title" content="Deep Three">
 <meta property="og:description" content="Daily NBA rare-answer trivia. How deep can you shoot?">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Deep Three">
+<meta property="og:url" content="https://playdeepthree.com/">
+<meta property="og:image" content="https://playdeepthree.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Deep Three - daily NBA rare-answer trivia">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Deep Three">
+<meta name="twitter:description" content="Daily NBA rare-answer trivia. How deep can you shoot?">
+<meta name="twitter:image" content="https://playdeepthree.com/og.png">
 <meta name="theme-color" content="#06090f">
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-2 18 204 172%22%3E%3Cdefs%3E%3CradialGradient id=%22bgF%22 cx=%220.38%22 cy=%220.32%22 r=%220.8%22%3E%0A%3Cstop offset=%220%22 stop-color=%22%23FFC07A%22/%3E%3Cstop offset=%220.45%22 stop-color=%22%23FF8A2A%22/%3E%3Cstop offset=%221%22 stop-color=%22%23D2560E%22/%3E%3C/radialGradient%3E%0A%3CclipPath id=%22bcF%22%3E%3Ccircle cx=%22100%22 cy=%22104%22 r=%2278%22/%3E%3C/clipPath%3E%3C/defs%3E%0A%3Ccircle cx=%22100%22 cy=%22104%22 r=%2278%22 fill=%22url(%23bgF)%22/%3E%0A%3Cg clip-path=%22url(%23bcF)%22 fill=%22none%22 stroke=%22%237A2E06%22 stroke-width=%225%22 stroke-linecap=%22round%22 opacity=%220.9%22%3E%0A%3Cpath d=%22M100 22 Q114 104 100 186%22/%3E%3Cpath d=%22M18 112 Q100 96 182 112%22/%3E%0A%3Cpath d=%22M46 40 Q86 108 40 172%22/%3E%3Cpath d=%22M154 40 Q114 108 160 172%22/%3E%3C/g%3E%0A%3Cellipse cx=%2270%22 cy=%2262%22 rx=%2224%22 ry=%2210%22 transform=%22rotate(-28 70 62)%22 fill=%22%23ffffff%22 opacity=%220.55%22/%3E%0A%3Cg transform=%22rotate(-8 100 60)%22%3E%3Crect x=%2234%22 y=%2248%22 width=%22132%22 height=%2220%22 rx=%2210%22 fill=%22%23ffffff%22 stroke=%22%2314205E%22 stroke-width=%225%22/%3E%0A%3Crect x=%2240%22 y=%2255%22 width=%22120%22 height=%226%22 rx=%223%22 fill=%22%233DF5FF%22/%3E%3C/g%3E%0A%3Ccircle cx=%22100%22 cy=%22104%22 r=%2278%22 fill=%22none%22 stroke=%22%2314205E%22 stroke-width=%228%22/%3E%0A%3Cellipse cx=%2280%22 cy=%22108%22 rx=%229%22 ry=%2215%22 fill=%22%2314205E%22/%3E%3Cellipse cx=%22122%22 cy=%22104%22 rx=%229%22 ry=%2215%22 fill=%22%2314205E%22/%3E%0A%3Ccircle cx=%2283%22 cy=%22101%22 r=%223.6%22 fill=%22%23ffffff%22/%3E%3Ccircle cx=%22125%22 cy=%2297%22 r=%223.6%22 fill=%22%23ffffff%22/%3E%0A%3Cellipse cx=%2262%22 cy=%22132%22 rx=%2210%22 ry=%226%22 fill=%22%23FF6FA5%22 opacity=%220.85%22/%3E%3Cellipse cx=%22142%22 cy=%22126%22 rx=%2210%22 ry=%226%22 fill=%22%23FF6FA5%22 opacity=%220.85%22/%3E%0A%3Cpath d=%22M90 132 Q103 142 116 128%22 fill=%22none%22 stroke=%22%2314205E%22 stroke-width=%225%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
@@ -3303,7 +3314,7 @@ var SCENE=(function(){
   }
   $("btnCopy").addEventListener("click",function(){
     var txt="DEEP THREE \u{1F3C0} "+prettyDate()+(THEMES[todayKey()]?" \u00B7 "+THEMES[todayKey()]:"")+"\n"+
-      S.tds+" BKT · "+total()+"/"+MAXYDS+" pts\n"+S.res.map(function(r){return EMOJI[r.tier];}).join("");
+      S.tds+" BKT · "+total()+"/"+MAXYDS+" pts\n"+S.res.map(function(r){return EMOJI[r.tier];}).join("")+"\nplaydeepthree.com";
     function fb(){ $("copied").textContent=txt.replace(/\n/g,"  ·  "); }
     try{ navigator.clipboard.writeText(txt).then(function(){ $("copied").textContent="Copied. Go talk trash."; },fb); }catch(e){ fb(); }
   });
