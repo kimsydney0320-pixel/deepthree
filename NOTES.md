@@ -3,7 +3,7 @@
 Context that lives in conversations and gets lost with them. Keep it short; update it when a
 decision is made or an open question is settled.
 
-Last updated: 2026-11-20
+Last updated: 2026-11-22
 
 ## Where things stand
 
@@ -29,6 +29,12 @@ New prompts should probably lean harder to keep the rarity tiers meaningful.
 - **Shares Moonball's Firebase project.** Every collection is prefixed `d3_`. That prefix is the
   only thing separating the two games' data, which is why one `firestore.rules` file has to cover
   both and is kept identical in both repos.
+- **Every tier is shot from where its name says (Nov 22).** The six spots live in `SHOTS` in
+  the scene code, and the shooter now walks out to his spot before he rises. Distances from the
+  rim run 1.7, 2.7, 3.9, 5.0, 6.6 and 14.0; the arc sits 4.2 out, so layup, floater and mid-range
+  are inside it and the three tiers above are behind it. The corner three is wide (lat 4.9) and
+  near the baseline, which is the corner. On a narrow screen the spot is pulled in far enough to
+  stay in frame, keeping the corner the widest of the six. The same file drives both games.
 - **Tier names translate Moonball's throw-depth metaphor to shot distance** — Layup, Floater,
   Mid-Range, Corner Three, Deep Three, Logo Shot — with identical point values.
 - **Answers are obfuscated, not secured.** Same XOR scheme as Moonball; the decoder ships in
